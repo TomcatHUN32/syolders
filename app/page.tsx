@@ -219,11 +219,11 @@ export default function LandingPage() {
               {/* Logo — screen blend makes the gray checkerboard invisible on dark bg */}
               <div className="w-8 h-8 bg-slate-900 rounded-lg overflow-hidden flex items-center justify-center">
                 <img
-                  src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz.png"
+                  src="/image.png"
                   alt="SYORDER"
                   width={32}
                   height={32}
-                  style={{ mixBlendMode: 'screen', objectFit: 'contain' }}
+                  className="object-contain w-full h-full"
                 />
               </div>
               <span className="text-base font-bold tracking-widest text-white uppercase">SYORDER</span>
@@ -284,11 +284,11 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-white/5 rounded-3xl blur-2xl scale-125" />
               <div className="relative w-24 h-24 rounded-3xl bg-slate-900 border border-slate-800/80 flex items-center justify-center shadow-2xl overflow-hidden">
                 <img
-                  src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz.png"
+                  src="/image.png"
                   alt="SYORDER Logo"
                   width={80}
                   height={80}
-                  style={{ mixBlendMode: 'screen', objectFit: 'contain' }}
+                  className="object-contain w-full h-full"
                 />
               </div>
             </div>
@@ -660,7 +660,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 overflow-hidden">
-              <img src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz.png" alt="SYORDER" width={28} height={28} style={{ mixBlendMode: 'screen', objectFit: 'contain' }} />
+              <img src="/image.png" alt="SYORDER" width={28} height={28} className="object-contain w-full h-full" />
             </div>
             <span className="font-bold text-white tracking-widest text-sm uppercase">SYORDER</span>
           </div>
