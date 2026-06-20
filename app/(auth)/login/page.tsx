@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { SyorderLogoMark } from '@/components/syorder-logo';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -22,6 +23,20 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
 
+    // Clear stale/invalid tokens from localStorage to prevent 401 loops
+    try {
+      const projectRef =
+        process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/https:\/\/([^.]+)/)?.[1] ?? '';
+      if (typeof window !== 'undefined' && projectRef) {
+        localStorage.removeItem(`sb-${projectRef}-auth-token`);
+        localStorage.removeItem(`sb-${projectRef}-auth-token-code-verifier`);
+      }
+      // Sign out locally (clear in-memory session) without hitting the server
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch {
+      // Ignore — we just want to start fresh
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
@@ -32,7 +47,7 @@ export default function LoginPage() {
 
     toast.success('Üdvözlünk vissza!');
 
-    // Check if superadmin — redirect to admin panel
+    // Superadmin check → redirect to admin panel
     const { data: userData } = await supabase
       .from('users')
       .select('is_superadmin')
@@ -49,7 +64,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 px-4">
-      {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-slate-800/20 rounded-full blur-3xl" />
       </div>
@@ -58,7 +72,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 mb-4 overflow-hidden">
-            <img src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png" alt="SYORDER" className="h-12 w-12 object-contain" />
+            <SyorderLogoMark size={40} variant="light" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">SYORDER</h1>
           <p className="text-slate-400 text-sm mt-1">Étteremkezelő Platform</p>
@@ -71,9 +85,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-slate-300 text-sm">
-                Email cím
-              </Label>
+              <Label htmlFor="email" className="text-slate-300 text-sm">Email cím</Label>
               <Input
                 id="email"
                 type="email"
@@ -81,13 +93,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-slate-500 focus:ring-slate-500"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password" className="text-slate-300 text-sm">
-                Jelszó
-              </Label>
+              <Label htmlFor="password" className="text-slate-300 text-sm">Jelszó</Label>
               <Input
                 id="password"
                 type="password"
@@ -95,6 +106,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-slate-500 focus:ring-slate-500"
               />
             </div>
@@ -117,7 +129,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Back to home */}
         <div className="mt-6 text-center">
           <Link
             href="/"
@@ -128,7 +139,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Admin indicator for admin subdomain */}
         <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-600">
           <Shield className="h-3 w-3" />
           <span>Biztonságos kapcsolat</span>

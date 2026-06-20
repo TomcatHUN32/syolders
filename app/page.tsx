@@ -27,6 +27,7 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { SyorderLogoMark } from '@/components/syorder-logo';
 
 type PlanKey = 'indulo' | 'professzionalis';
 type BillingKey = 'havi' | 'negyedeves' | 'eves';
@@ -76,7 +77,6 @@ function fmt(n: number) { return n.toLocaleString('hu-HU'); }
 
 export default function LandingPage() {
   const [navOpen, setNavOpen] = useState(false);
-  const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
   const [activeBilling, setActiveBilling] = useState<BillingKey>('havi');
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>('indulo');
   const [selectedBilling, setSelectedBilling] = useState<BillingKey>('havi');
@@ -123,7 +123,7 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto bg-slate-900/80 backdrop-blur-xl border border-slate-800/60 rounded-2xl px-5 h-14 flex items-center justify-between shadow-lg shadow-black/30">
             <Link href="/" className="flex items-center gap-3 select-none">
               <div className="h-9 w-9 flex items-center justify-center rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
-                <img src={LOGO} alt="SYORDER" className="h-8 w-8 object-contain" />
+                <SyorderLogoMark size={28} variant="light" />
               </div>
               <span className="text-sm font-bold tracking-widest text-white uppercase">SYORDER</span>
             </Link>
@@ -173,11 +173,7 @@ export default function LandingPage() {
             <div className="relative">
               <div className="absolute inset-0 blur-2xl bg-white/5 rounded-3xl scale-150 pointer-events-none" />
               <div className="relative w-24 h-24 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shadow-2xl">
-                <img
-                  src={LOGO}
-                  alt="SYORDER"
-                  className="w-20 h-20 object-contain"
-                />
+                <SyorderLogoMark size={72} variant="light" />
               </div>
             </div>
           </div>
@@ -452,7 +448,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center">
-              <img src={LOGO} alt="SYORDER" className="h-7 w-7 object-contain" />
+              <SyorderLogoMark size={24} variant="light" />
             </div>
             <span className="font-bold text-white tracking-widest text-sm uppercase">SYORDER</span>
           </div>

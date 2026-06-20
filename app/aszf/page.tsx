@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft, Shield } from 'lucide-react';
+import { SyorderLogoMark } from '@/components/syorder-logo';
 
-const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
+// Logo constant removed — using SVG component
 
 export const metadata = {
   title: 'Általános Szerződési Feltételek — SYORDER',
@@ -14,7 +15,7 @@ export default function AszfPage() {
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
-              <img src={LOGO} alt="SYORDER" className="h-7 w-7 object-contain" />
+              <SyorderLogoMark size={24} variant="light" />
             </div>
             <span className="font-bold text-white tracking-widest text-sm uppercase">SYORDER</span>
           </Link>
