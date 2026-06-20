@@ -24,7 +24,6 @@ import {
   LogIn,
   Menu,
   X,
-  ExternalLink,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -134,9 +133,6 @@ export default function LandingPage() {
               {[['#features','Funkciók'],['#pricing','Árak'],['#igenyles','Igénylés']].map(([h,l])=>(
                 <a key={h} href={h} className="hover:text-white transition-colors">{l}</a>
               ))}
-              <Link href="/search" className="hover:text-white transition-colors flex items-center gap-1">
-                Éttermek keresése <ExternalLink className="h-3 w-3" />
-              </Link>
             </div>
 
             <div className="flex items-center gap-2">
@@ -161,7 +157,6 @@ export default function LandingPage() {
               {[['#features','Funkciók'],['#pricing','Árak'],['#igenyles','Igénylés']].map(([h,l])=>(
                 <a key={h} href={h} onClick={() => setNavOpen(false)} className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 text-sm">{l}</a>
               ))}
-              <Link href="/search" onClick={() => setNavOpen(false)} className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 text-sm">Éttermek keresése</Link>
               <div className="pt-2 border-t border-slate-800 flex gap-2">
                 <Link href="/login" className="flex-1"><Button variant="outline" size="sm" className="w-full border-slate-700 text-slate-300 bg-transparent">Belépés</Button></Link>
                 <a href="#igenyles" className="flex-1"><Button size="sm" className="w-full bg-white text-slate-900">Igénylés</Button></a>
@@ -215,11 +210,6 @@ export default function LandingPage() {
                 Ingyenes Igénylés <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </a>
-            <Link href="/search">
-              <Button variant="outline" size="lg" className="border-slate-700 text-slate-300 h-12 px-8 text-base hover:bg-slate-900/50 bg-transparent">
-                Éttermek böngészése
-              </Button>
-            </Link>
           </div>
 
           {/* Quick stats strip */}
@@ -473,7 +463,6 @@ export default function LandingPage() {
           </div>
           <p className="text-xs text-slate-600">© {new Date().getFullYear()} SYORDER. Minden jog fenntartva.</p>
           <div className="flex items-center gap-4 text-xs">
-            <Link href="/search" className="text-slate-500 hover:text-white transition-colors">Éttermek keresése</Link>
             <Link href="/login" className="text-slate-500 hover:text-white transition-colors flex items-center gap-1">
               <LogIn className="h-3.5 w-3.5" /> Partner Belépés
             </Link>

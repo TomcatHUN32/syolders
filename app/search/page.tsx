@@ -11,9 +11,6 @@ import {
   UtensilsCrossed,
   Loader2,
   Phone,
-  ArrowRight,
-  Clock,
-  Star,
   ChevronRight,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
@@ -121,9 +118,7 @@ export default function SearchPage() {
             />
           </div>
 
-          <Link href="/login" className="shrink-0 hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors">
-            Partner belépés <ArrowRight className="h-3 w-3" />
-          </Link>
+          <div className="hidden sm:block" />
         </div>
       </header>
 
