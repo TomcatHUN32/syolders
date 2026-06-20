@@ -489,6 +489,8 @@ export type Database = {
           status: string;
           subdomain: string | null;
           notes: string | null;
+          plan: string | null;
+          billing_period: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -504,6 +506,8 @@ export type Database = {
           status?: string;
           subdomain?: string | null;
           notes?: string | null;
+          plan?: string | null;
+          billing_period?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -519,6 +523,8 @@ export type Database = {
           status?: string;
           subdomain?: string | null;
           notes?: string | null;
+          plan?: string | null;
+          billing_period?: string | null;
           created_at?: string;
           updated_at?: string;
         };

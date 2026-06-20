@@ -26,9 +26,11 @@ import {
   MapPin,
   Star,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface PlatformStats {
   activeRestaurants: number;
@@ -46,6 +48,33 @@ interface RestaurantResult {
   cuisines: string[];
   primary_color: string;
 }
+
+type PlanKey = 'indulo' | 'professzionalis';
+type BillingKey = 'havi' | 'negyedeves' | 'eves';
+
+const PRICING: Record<PlanKey, Record<BillingKey, { monthly: number; total: number; saving: number }>> = {
+  indulo: {
+    havi:        { monthly: 14900, total: 14900,  saving: 0 },
+    negyedeves:  { monthly: 13500, total: 40500,  saving: 3200 },
+    eves:        { monthly: 11900, total: 142800, saving: 25800 },
+  },
+  professzionalis: {
+    havi:        { monthly: 29900, total: 29900,  saving: 0 },
+    negyedeves:  { monthly: 27500, total: 82500,  saving: 7200 },
+    eves:        { monthly: 23900, total: 286800, saving: 72000 },
+  },
+};
+
+const PLAN_LABELS: Record<PlanKey, string> = {
+  indulo: 'Induló',
+  professzionalis: 'Professzionális',
+};
+
+const BILLING_LABELS: Record<BillingKey, string> = {
+  havi: 'Havi',
+  negyedeves: 'Negyedéves',
+  eves: 'Éves',
+};
 
 const features = [
   {
@@ -80,39 +109,42 @@ const features = [
   },
 ];
 
-const plans = [
+const plans: {
+  key: PlanKey;
+  name: string;
+  desc: string;
+  features: string[];
+  highlighted: boolean;
+}[] = [
   {
+    key: 'indulo',
     name: 'Induló',
-    price: '14 900',
     desc: 'Kis éttermek és büfék számára',
-    features: ['1 helyszín', 'Korlátlan rendelés', 'Menükezelés', 'Alap analitika'],
+    features: [
+      '1 helyszín',
+      'Korlátlan rendelés',
+      'Menükezelés',
+      'Alap analitika',
+      'Kassza integráció',
+      'E-mail support',
+    ],
     highlighted: false,
   },
   {
+    key: 'professzionalis',
     name: 'Professzionális',
-    price: '29 900',
     desc: 'Növekvő vendéglátóhelyek számára',
     features: [
-      '1 helyszín',
+      'Több helyszín',
       'Korlátlan rendelés',
       'Készletkezelés',
       'Hűségprogram',
       'Részletes analitika',
+      'Kassza & szállítási integráció',
+      'API hozzáférés',
       'Prioritásos support',
     ],
     highlighted: true,
-  },
-  {
-    name: 'Vállalati',
-    price: 'Egyedi',
-    desc: 'Lánc éttermek és franchise-ok számára',
-    features: [
-      'Több helyszín',
-      'Minden funkció',
-      'Egyedi integráció',
-      'Dedikált account manager',
-    ],
-    highlighted: false,
   },
 ];
 
@@ -122,11 +154,15 @@ function StarRating({ value }: { value: number }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className={`h-4 w-4 ${i <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`}
+          className={`h-4 w-4 ${i <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'text-slate-600'}`}
         />
       ))}
     </div>
   );
+}
+
+function fmt(n: number) {
+  return n.toLocaleString('hu-HU');
 }
 
 export default function LandingPage() {
@@ -138,6 +174,9 @@ export default function LandingPage() {
   });
   const [statsLoading, setStatsLoading] = useState(true);
 
+  // Pricing toggle state
+  const [activeBilling, setActiveBilling] = useState<BillingKey>('havi');
+
   // Restaurant search state
   const [searchName, setSearchName] = useState('');
   const [searchCity, setSearchCity] = useState('');
@@ -145,6 +184,8 @@ export default function LandingPage() {
   const [searching, setSearching] = useState(false);
 
   // Application form state
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey>('indulo');
+  const [selectedBilling, setSelectedBilling] = useState<BillingKey>('havi');
   const [form, setForm] = useState({
     business_name: '',
     contact_name: '',
@@ -200,7 +241,6 @@ export default function LandingPage() {
       query = query.ilike('name', `%${searchName.trim()}%`);
     }
     if (searchCity.trim()) {
-      // match restaurant's own city (address) OR delivery_cities array
       query = query.or(
         `address.ilike.%${searchCity.trim()}%,delivery_cities.cs.{"${searchCity.trim()}"}`
       );
@@ -231,6 +271,8 @@ export default function LandingPage() {
         city: form.city || null,
         address: form.address || null,
         message: form.message || null,
+        plan: selectedPlan,
+        billing_period: selectedBilling,
       });
       if (error) throw error;
       setSubmitted(true);
@@ -242,6 +284,8 @@ export default function LandingPage() {
       setSubmitting(false);
     }
   }
+
+  const chosenPricing = PRICING[selectedPlan][selectedBilling];
 
   const displayStats = [
     {
@@ -299,7 +343,6 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-28 pb-32 px-4">
-        {/* Technical grid background */}
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
@@ -308,11 +351,9 @@ export default function LandingPage() {
             backgroundSize: '80px 80px',
           }}
         />
-        {/* Glow */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-slate-600/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-5xl mx-auto text-center">
-          {/* Logo large */}
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div className="absolute inset-0 bg-white/5 rounded-3xl blur-xl scale-110" />
@@ -368,7 +409,7 @@ export default function LandingPage() {
 
         {/* Stats */}
         <div className="relative max-w-4xl mx-auto mt-24 grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-800/50 rounded-2xl overflow-hidden border border-slate-800">
-          {displayStats.map((s, i) => (
+          {displayStats.map((s) => (
             <div
               key={s.label}
               className="bg-slate-900/80 px-6 py-7 text-center flex flex-col items-center justify-center"
@@ -432,7 +473,6 @@ export default function LandingPage() {
             </Button>
           </form>
 
-          {/* Search Results */}
           {searchResults !== null && (
             <div className="mt-6 space-y-3">
               {searchResults.length === 0 ? (
@@ -444,9 +484,7 @@ export default function LandingPage() {
                 </div>
               ) : (
                 <>
-                  <p className="text-xs text-slate-500 px-1">
-                    {searchResults.length} találat
-                  </p>
+                  <p className="text-xs text-slate-500 px-1">{searchResults.length} találat</p>
                   {searchResults.map((r) => (
                     <div
                       key={r.id}
@@ -531,30 +569,13 @@ export default function LandingPage() {
       <section className="py-24 px-4 bg-slate-900 border-y border-slate-800">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Hogyan működik?
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Hogyan működik?</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              {
-                step: '01',
-                title: 'Küldd be az igénylést',
-                desc: 'Töltsd ki az alábbi űrlapot az éttermed alapadataival.',
-                icon: ChefHat,
-              },
-              {
-                step: '02',
-                title: 'Aktiválás 24 órán belül',
-                desc: 'Csapatunk feldolgozza a kérést és aktiválja az fiókodat.',
-                icon: Zap,
-              },
-              {
-                step: '03',
-                title: 'Kezdd el használni',
-                desc: 'Bejelentkezel és azonnal elkezdheted a rendelések kezelését.',
-                icon: TrendingUp,
-              },
+              { step: '01', title: 'Küldd be az igénylést', desc: 'Töltsd ki az alábbi űrlapot az éttermed alapadataival.', icon: ChefHat },
+              { step: '02', title: 'Aktiválás 24 órán belül', desc: 'Csapatunk feldolgozza a kérést és aktiválja az fiókodat.', icon: Zap },
+              { step: '03', title: 'Kezdd el használni', desc: 'Bejelentkezel és azonnal elkezdheted a rendelések kezelését.', icon: TrendingUp },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="relative inline-flex">
@@ -575,62 +596,108 @@ export default function LandingPage() {
 
       {/* Pricing */}
       <section id="pricing" className="py-24 px-4 bg-slate-950">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Áraink</h2>
-            <p className="text-lg text-slate-400">Rejtett díjak nélkül, azonnali aktiválással.</p>
+            <p className="text-lg text-slate-400 mb-8">Rejtett díjak nélkül, azonnali aktiválással.</p>
+
+            {/* Billing toggle */}
+            <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-slate-800">
+              {(Object.entries(BILLING_LABELS) as [BillingKey, string][]).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveBilling(key)}
+                  className={cn(
+                    'px-5 py-2 rounded-lg text-sm font-medium transition-all',
+                    activeBilling === key
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  {label}
+                  {key === 'eves' && (
+                    <span className="ml-1.5 text-xs text-emerald-400 font-semibold">-20%</span>
+                  )}
+                  {key === 'negyedeves' && (
+                    <span className="ml-1.5 text-xs text-amber-400 font-semibold">-10%</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 items-start">
-            {plans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={`relative border bg-slate-900 ${
-                  plan.highlighted
-                    ? 'border-slate-400 shadow-xl shadow-white/5 scale-[1.02]'
-                    : 'border-slate-800'
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-white text-slate-900 px-4 py-1 text-xs font-semibold">
-                      Legnépszerűbb
-                    </Badge>
-                  </div>
-                )}
-                <CardContent className="p-6">
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                    <p className="text-sm text-slate-400 mt-1">{plan.desc}</p>
-                    <div className="mt-4 flex items-baseline gap-1">
-                      {plan.price === 'Egyedi' ? (
-                        <span className="text-3xl font-extrabold text-white">Egyedi</span>
-                      ) : (
-                        <>
-                          <span className="text-3xl font-extrabold text-white">{plan.price}</span>
-                          <span className="text-sm text-slate-500">Ft / hó</span>
-                        </>
-                      )}
+
+          <div className="grid md:grid-cols-2 gap-6 items-start">
+            {plans.map((plan) => {
+              const p = PRICING[plan.key][activeBilling];
+              return (
+                <Card
+                  key={plan.key}
+                  className={cn(
+                    'relative border bg-slate-900',
+                    plan.highlighted
+                      ? 'border-slate-400 shadow-xl shadow-white/5'
+                      : 'border-slate-800'
+                  )}
+                >
+                  {plan.highlighted && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                      <Badge className="bg-white text-slate-900 px-4 py-1 text-xs font-semibold">
+                        Legnépszerűbb
+                      </Badge>
                     </div>
-                  </div>
-                  <ul className="space-y-2.5 mb-6">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
-                        <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <a href="#igenyles">
-                    <Button
-                      className={`w-full ${plan.highlighted ? 'bg-white text-slate-900 hover:bg-slate-100' : 'border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent'}`}
-                      variant={plan.highlighted ? 'default' : 'outline'}
+                  )}
+                  <CardContent className="p-6">
+                    <div className="mb-6">
+                      <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+                      <p className="text-sm text-slate-400 mt-1">{plan.desc}</p>
+                      <div className="mt-4">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-4xl font-extrabold text-white">
+                            {fmt(p.monthly)}
+                          </span>
+                          <span className="text-sm text-slate-500">Ft / hó</span>
+                        </div>
+                        {activeBilling !== 'havi' && (
+                          <div className="mt-1.5 space-y-0.5">
+                            <p className="text-sm text-slate-400">
+                              Összesen: <span className="text-white font-medium">{fmt(p.total)} Ft</span>
+                              {' '}({activeBilling === 'negyedeves' ? '3 hónap' : '12 hónap'})
+                            </p>
+                            <p className="text-sm text-emerald-400 font-medium">
+                              Megtakarítás: {fmt(p.saving)} Ft / év
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <ul className="space-y-2.5 mb-6">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
+                          <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href="#igenyles"
+                      onClick={() => { setSelectedPlan(plan.key); setSelectedBilling(activeBilling); }}
                     >
-                      Igénylés beküldése
-                    </Button>
-                  </a>
-                </CardContent>
-              </Card>
-            ))}
+                      <Button
+                        className={cn(
+                          'w-full',
+                          plan.highlighted
+                            ? 'bg-white text-slate-900 hover:bg-slate-100'
+                            : 'border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent'
+                        )}
+                        variant={plan.highlighted ? 'default' : 'outline'}
+                      >
+                        Igénylés — {PLAN_LABELS[plan.key]}, {BILLING_LABELS[activeBilling]}
+                      </Button>
+                    </a>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -664,7 +731,108 @@ export default function LandingPage() {
           ) : (
             <Card className="border border-slate-800 bg-slate-900/60">
               <CardContent className="p-8">
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-6">
+
+                  {/* Plan selector */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-slate-300">
+                      Csomag kiválasztása <span className="text-red-400">*</span>
+                    </Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {plans.map((plan) => (
+                        <button
+                          key={plan.key}
+                          type="button"
+                          onClick={() => setSelectedPlan(plan.key)}
+                          className={cn(
+                            'p-4 rounded-xl border text-left transition-all',
+                            selectedPlan === plan.key
+                              ? 'border-white bg-white/10 text-white'
+                              : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600'
+                          )}
+                        >
+                          <div className="font-semibold text-sm">{plan.name}</div>
+                          <div className="text-xs mt-0.5 opacity-70">{plan.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Billing period selector */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-slate-300">
+                      Előfizetés időszaka <span className="text-red-400">*</span>
+                    </Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(Object.entries(BILLING_LABELS) as [BillingKey, string][]).map(([key, label]) => {
+                        const p = PRICING[selectedPlan][key];
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => setSelectedBilling(key)}
+                            className={cn(
+                              'p-3 rounded-xl border text-left transition-all',
+                              selectedBilling === key
+                                ? 'border-white bg-white/10 text-white'
+                                : 'border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600'
+                            )}
+                          >
+                            <div className="font-semibold text-sm">{label}</div>
+                            <div className="text-xs mt-0.5 text-slate-300">
+                              {fmt(p.monthly)} Ft/hó
+                            </div>
+                            {key !== 'havi' && p.saving > 0 && (
+                              <div className="text-xs text-emerald-400 mt-0.5">
+                                -{fmt(p.saving)} Ft/év
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Price summary */}
+                  <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-400">Kiválasztott csomag</span>
+                      <span className="font-semibold text-white">
+                        {PLAN_LABELS[selectedPlan]} — {BILLING_LABELS[selectedBilling]}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-400">Havi díj</span>
+                      <span className="font-bold text-white text-base">
+                        {fmt(chosenPricing.monthly)} Ft / hó
+                      </span>
+                    </div>
+                    {selectedBilling !== 'havi' && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-slate-400">
+                          Fizetendő összeg ({selectedBilling === 'negyedeves' ? '3 hónap' : '12 hónap'})
+                        </span>
+                        <span className="font-bold text-white">
+                          {fmt(chosenPricing.total)} Ft
+                        </span>
+                      </div>
+                    )}
+                    {chosenPricing.saving > 0 && (
+                      <div className="flex items-center justify-between text-sm border-t border-slate-700 pt-2 mt-2">
+                        <span className="text-emerald-400">Éves megtakarítás</span>
+                        <span className="font-bold text-emerald-400">{fmt(chosenPricing.saving)} Ft</span>
+                      </div>
+                    )}
+                    {/* Invoice warning */}
+                    <div className="flex items-start gap-2 mt-3 pt-3 border-t border-slate-700">
+                      <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-400 font-medium">
+                        Az igénylés jóváhagyása után díjbekérő fog érkezni a megadott email-címre. A fizetés beérkezése után aktiváljuk az éttermedet.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Contact fields */}
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="business_name" className="text-sm font-medium text-slate-300">
@@ -729,9 +897,7 @@ export default function LandingPage() {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="city" className="text-sm font-medium text-slate-300">
-                        Város
-                      </Label>
+                      <Label htmlFor="city" className="text-sm font-medium text-slate-300">Város</Label>
                       <Input
                         id="city"
                         name="city"
@@ -742,9 +908,7 @@ export default function LandingPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="address" className="text-sm font-medium text-slate-300">
-                        Cím
-                      </Label>
+                      <Label htmlFor="address" className="text-sm font-medium text-slate-300">Cím</Label>
                       <Input
                         id="address"
                         name="address"
@@ -766,34 +930,32 @@ export default function LandingPage() {
                       value={form.message}
                       onChange={handleChange}
                       placeholder="Röviden mutasd be az éttermedet: hány asztal, van-e kiszállítás, elvitel..."
-                      rows={4}
+                      rows={3}
                       className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-600 focus:border-slate-500 resize-none"
                     />
                   </div>
 
-                  <div className="pt-2">
-                    <Button
-                      type="submit"
-                      className="w-full h-12 bg-white hover:bg-slate-100 text-slate-900 font-semibold text-base shadow-lg shadow-white/10"
-                      disabled={submitting}
-                    >
-                      {submitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Küldés...
-                        </>
-                      ) : (
-                        <>
-                          Igénylés Beküldése
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                    <p className="text-xs text-slate-600 text-center mt-3">
-                      Az igénylés elküldésével elfogadod az Általános Szerződési
-                      Feltételeinket. Szoftver aktiválás 24 órán belül.
-                    </p>
-                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-white hover:bg-slate-100 text-slate-900 font-semibold text-base shadow-lg shadow-white/10"
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Küldés...
+                      </>
+                    ) : (
+                      <>
+                        Igénylés Beküldése
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-slate-600 text-center">
+                    Az igénylés elküldésével elfogadod az Általános Szerződési Feltételeinket.
+                  </p>
                 </form>
               </CardContent>
             </Card>

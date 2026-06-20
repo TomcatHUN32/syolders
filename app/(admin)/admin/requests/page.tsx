@@ -213,6 +213,20 @@ export default function AdminRequestsPage() {
                         {req.contact_name} · {req.email}
                         {req.city && ` · ${req.city}`}
                       </p>
+                      {(req.plan || req.billing_period) && (
+                        <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
+                          {req.plan && (
+                            <span className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-600 font-medium">
+                              {req.plan === 'indulo' ? 'Induló' : 'Professzionális'}
+                            </span>
+                          )}
+                          {req.billing_period && (
+                            <span className="px-1.5 py-0.5 bg-slate-100 rounded text-slate-600">
+                              {req.billing_period === 'havi' ? 'Havi' : req.billing_period === 'negyedeves' ? 'Negyedéves' : 'Éves'}
+                            </span>
+                          )}
+                        </p>
+                      )}
                       <p className="text-xs text-slate-400 mt-1">
                         {new Date(req.created_at).toLocaleString('hu-HU')}
                       </p>
