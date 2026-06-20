@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import {
-  Utensils,
   LayoutDashboard,
   FileText,
   Building2,
@@ -48,12 +47,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex flex-col h-full bg-slate-900 text-white">
       <div className="p-5 border-b border-slate-800">
         <Link href="/admin" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-            <Utensils className="h-4 w-4 text-white" />
+          <div className="w-8 h-8 bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center border border-slate-700">
+            <img
+              src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz.png"
+              alt="SYORDER"
+              width={28}
+              height={28}
+              style={{ mixBlendMode: 'screen', objectFit: 'contain' }}
+            />
           </div>
           <div>
-            <div className="font-bold text-white leading-tight">SYORDER</div>
-            <div className="flex items-center gap-1 text-xs text-slate-400">
+            <div className="font-bold text-white leading-tight tracking-widest text-sm uppercase">SYORDER</div>
+            <div className="flex items-center gap-1 text-xs text-slate-500">
               <Shield className="h-2.5 w-2.5" />
               Admin Panel
             </div>
