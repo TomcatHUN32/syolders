@@ -49,11 +49,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link href="/admin" className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center border border-slate-700">
             <img
-              src="/image.png"
+              src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png"
               alt="SYORDER"
               width={28}
               height={28}
               className="object-contain w-full h-full"
+              style={{ mixBlendMode: 'screen' }}
             />
           </div>
           <div>

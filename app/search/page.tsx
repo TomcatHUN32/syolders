@@ -16,7 +16,7 @@ import {
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
-const LOGO = '/image.png';
+const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
 
 interface Restaurant {
   id: string;

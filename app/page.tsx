@@ -76,7 +76,7 @@ function fmt(n: number) { return n.toLocaleString('hu-HU'); }
 
 export default function LandingPage() {
   const [navOpen, setNavOpen] = useState(false);
-  const LOGO = '/image.png';
+  const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
   const [activeBilling, setActiveBilling] = useState<BillingKey>('havi');
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>('indulo');
   const [selectedBilling, setSelectedBilling] = useState<BillingKey>('havi');
