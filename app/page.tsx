@@ -78,6 +78,7 @@ function fmt(n: number) { return n.toLocaleString('hu-HU'); }
 
 export default function LandingPage() {
   const [navOpen, setNavOpen] = useState(false);
+  const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
   const [activeBilling, setActiveBilling] = useState<BillingKey>('havi');
   const [selectedPlan, setSelectedPlan] = useState<PlanKey>('indulo');
   const [selectedBilling, setSelectedBilling] = useState<BillingKey>('havi');
@@ -124,7 +125,7 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto bg-slate-900/80 backdrop-blur-xl border border-slate-800/60 rounded-2xl px-5 h-14 flex items-center justify-between shadow-lg shadow-black/30">
             <Link href="/" className="flex items-center gap-3 select-none">
               <div className="h-9 w-9 flex items-center justify-center rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
-                <img src="/image.png" alt="SYORDER" className="h-8 w-8 object-contain" />
+                <img src={LOGO} alt="SYORDER" className="h-8 w-8 object-contain" />
               </div>
               <span className="text-sm font-bold tracking-widest text-white uppercase">SYORDER</span>
             </Link>
@@ -183,7 +184,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 blur-2xl bg-white/5 rounded-3xl scale-150 pointer-events-none" />
               <div className="relative w-24 h-24 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shadow-2xl">
                 <img
-                  src="/image.png"
+                  src={LOGO}
                   alt="SYORDER"
                   className="w-20 h-20 object-contain"
                 />
@@ -259,9 +260,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-10">
             {[
-              { step: '01', title: 'Küldd be az igénylést', desc: 'Töltsd ki az alábbi űrlapot az éttermed alapadataival.', icon: ChefHat },
-              { step: '02', title: 'Aktiválás 24 órán belül', desc: 'Csapatunk feldolgozza a kérést és aktiválja a fiókodat.', icon: Zap },
-              { step: '03', title: 'Kezdd el használni', desc: 'Bejelentkezel és azonnal elkezdheted a rendelések kezelését.', icon: TrendingUp },
+              { step: '01', title: 'Küldd be az igénylést', desc: 'Töltsd ki az alábbi űrlapot az éttermed alapadataival. Válassz csomagot és fizetési időszakot.', icon: ChefHat },
+              { step: '02', title: 'Jóváhagyás és díjbekérő', desc: 'Csapatunk 1–2 munkanapon belül elbírálja a kérelmet és díjbekérőt küld a megadott email-címre.', icon: Zap },
+              { step: '03', title: 'Aktiválás 2 munkanapon belül', desc: 'A fizetés beérkezésétől számított 2 munkanapon belül aktiváljuk a fiókodat és megküldjük a belépési adatokat.', icon: TrendingUp },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className="relative inline-flex mb-5">
@@ -452,7 +453,9 @@ export default function LandingPage() {
                 <Button type="submit" disabled={submitting} className="w-full h-12 bg-white hover:bg-slate-100 text-slate-900 font-bold text-base rounded-xl">
                   {submitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Küldés...</> : <>Igénylés Beküldése <ArrowRight className="ml-2 h-4 w-4" /></>}
                 </Button>
-                <p className="text-xs text-slate-600 text-center">Az igénylés elküldésével elfogadod az Általános Szerződési Feltételeinket.</p>
+                <p className="text-xs text-slate-600 text-center">Az igénylés elküldésével elfogadod az{' '}
+                  <Link href="/aszf" target="_blank" className="text-slate-400 underline hover:text-white transition-colors">Általános Szerződési Feltételeinket</Link>.
+                </p>
               </form>
             </div>
           )}
@@ -464,7 +467,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-slate-900 border border-slate-800 overflow-hidden flex items-center justify-center">
-              <img src="/image.png" alt="SYORDER" className="h-7 w-7 object-contain" />
+              <img src={LOGO} alt="SYORDER" className="h-7 w-7 object-contain" />
             </div>
             <span className="font-bold text-white tracking-widest text-sm uppercase">SYORDER</span>
           </div>

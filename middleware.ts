@@ -87,6 +87,7 @@ export function middleware(request: NextRequest) {
     pathname === '/login' ||
     pathname === '/register' ||
     pathname === '/search' ||
+    pathname === '/aszf' ||
     pathname.startsWith('/menu/') ||
     pathname.startsWith('/restaurant/') ||
     pathname.startsWith('/admin');
