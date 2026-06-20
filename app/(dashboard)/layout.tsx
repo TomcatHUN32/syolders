@@ -21,6 +21,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { SyorderLogoMark } from '@/components/syorder-logo';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -55,7 +56,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="p-4 border-b">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <div className="h-9 w-9 flex items-center justify-center rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
-            <img src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png" alt="SYORDER" className="h-8 w-8 object-contain" style={{ mixBlendMode: 'screen' }} />
+            <SyorderLogoMark size={28} variant="light" />
           </div>
           <span className="text-sm font-bold tracking-widest uppercase">SYORDER</span>
         </Link>

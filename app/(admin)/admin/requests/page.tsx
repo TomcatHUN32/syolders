@@ -39,6 +39,10 @@ import {
   MessageSquare,
   Building2,
   User,
+  Copy,
+  Check,
+  KeyRound,
+  Monitor,
 } from 'lucide-react';
 import { supabase, RestaurantRequest } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -49,6 +53,39 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secon
   rejected: { label: 'Elutasítva', variant: 'destructive' },
 };
 
+interface Credentials {
+  posEmail: string;
+  posPassword: string;
+  businessName: string;
+  subdomain: string;
+}
+
+function CopyField({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <div className="space-y-1">
+      <p className="text-xs text-slate-500 font-medium">{label}</p>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 bg-slate-100 rounded-md px-3 py-2 text-sm font-mono text-slate-800 break-all">
+          {value}
+        </code>
+        <button
+          onClick={copy}
+          className="shrink-0 p-2 rounded-md hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
+          title="Másolás"
+        >
+          {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminRequestsPage() {
   const [requests, setRequests] = useState<RestaurantRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,9 +95,11 @@ export default function AdminRequestsPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [credentialsOpen, setCredentialsOpen] = useState(false);
   const [subdomainInput, setSubdomainInput] = useState('');
   const [rejectNotes, setRejectNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [credentials, setCredentials] = useState<Credentials | null>(null);
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -113,19 +152,34 @@ export default function AdminRequestsPage() {
   async function handleApprove() {
     if (!selected || !subdomainInput.trim()) return;
     setSaving(true);
-    const { error } = await supabase
-      .from('restaurant_requests')
-      .update({ status: 'approved', subdomain: subdomainInput.trim(), updated_at: new Date().toISOString() })
-      .eq('id', selected.id);
 
-    if (error) {
-      toast.error('Hiba történt a jóváhagyás során');
-    } else {
-      toast.success(`${selected.business_name} jóváhagyva`);
+    try {
+      const res = await fetch('/api/admin/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: selected.id, subdomain: subdomainInput.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || 'Hiba történt a jóváhagyás során');
+        return;
+      }
+
+      setCredentials({
+        posEmail: data.posEmail,
+        posPassword: data.posPassword,
+        businessName: selected.business_name,
+        subdomain: subdomainInput.trim(),
+      });
       setApproveDialogOpen(false);
+      setCredentialsOpen(true);
+      toast.success(`${selected.business_name} jóváhagyva — belépési adatok generálva`);
       loadRequests();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   async function handleReject() {
@@ -378,7 +432,7 @@ export default function AdminRequestsPage() {
           <DialogHeader>
             <DialogTitle>Igénylés Jóváhagyása</DialogTitle>
             <DialogDescription>
-              Állítsd be az aldomain nevet a(z) {selected?.business_name} számára.
+              Állítsd be az aldomain nevet a(z) {selected?.business_name} számára. A jóváhagyás után a rendszer automatikusan generál belépési adatokat a pos2.syorder.hu-hoz.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -393,7 +447,7 @@ export default function AdminRequestsPage() {
               <span className="text-slate-500 text-sm whitespace-nowrap">.syorder.hu</span>
             </div>
             <p className="text-xs text-slate-400">
-              Csak kisbetűk, számok és kötőjel használható.
+              Csak kisbetűk, számok és kötőjel. A belépési email: <span className="font-mono">{subdomainInput || 'aldomain'}@pos2.syorder.hu</span>
             </p>
           </div>
           <DialogFooter>
@@ -403,7 +457,7 @@ export default function AdminRequestsPage() {
               disabled={saving || !subdomainInput.trim()}
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
-              {saving ? 'Mentés...' : 'Jóváhagyás'}
+              {saving ? 'Feldolgozás...' : 'Jóváhagyás & Hozzáférés generálása'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -436,6 +490,53 @@ export default function AdminRequestsPage() {
               disabled={saving}
             >
               {saving ? 'Mentés...' : 'Elutasítás'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Credentials Dialog */}
+      <Dialog open={credentialsOpen} onOpenChange={setCredentialsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                <KeyRound className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div>
+                <DialogTitle>Belépési adatok generálva</DialogTitle>
+                <DialogDescription className="text-xs">
+                  {credentials?.businessName}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-start gap-2">
+              <Monitor className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs font-semibold text-emerald-800">Bejelentkezési oldal</p>
+                <p className="text-sm font-mono text-emerald-700 mt-0.5">
+                  pos2.syorder.hu/login
+                </p>
+              </div>
+            </div>
+
+            <CopyField label="Email cím (felhasználónév)" value={credentials?.posEmail || ''} />
+            <CopyField label="Jelszó" value={credentials?.posPassword || ''} />
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs text-amber-700 font-semibold mb-1">Fontos!</p>
+              <p className="text-xs text-amber-600">
+                Ez a jelszó csak egyszer jelenik meg itt. Jegyezd fel és add át az ügyfelnek! A jelszó később nem kérdezhető le.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setCredentialsOpen(false)} className="w-full">
+              Megértettem, bezárás
             </Button>
           </DialogFooter>
         </DialogContent>

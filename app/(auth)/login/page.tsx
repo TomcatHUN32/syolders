@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
+import { SyorderLogoMark } from '@/components/syorder-logo';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -58,7 +59,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 mb-4 overflow-hidden">
-            <img src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png" alt="SYORDER" className="h-12 w-12 object-contain" style={{ mixBlendMode: 'screen' }} />
+            <SyorderLogoMark size={40} variant="light" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">SYORDER</h1>
           <p className="text-slate-400 text-sm mt-1">Étteremkezelő Platform</p>

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { SyorderLogoMark } from '@/components/syorder-logo';
 
 const navItems = [
   { href: '/admin', label: 'Áttekintés', icon: LayoutDashboard },
@@ -48,14 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="p-5 border-b border-slate-800">
         <Link href="/admin" className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-slate-800 rounded-lg overflow-hidden flex items-center justify-center border border-slate-700">
-            <img
-              src="/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png"
-              alt="SYORDER"
-              width={28}
-              height={28}
-              className="object-contain w-full h-full"
-              style={{ mixBlendMode: 'screen' }}
-            />
+            <SyorderLogoMark size={26} variant="light" />
           </div>
           <div>
             <div className="font-bold text-white leading-tight tracking-widest text-sm uppercase">SYORDER</div>
