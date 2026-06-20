@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Shield } from 'lucide-react';
 
-const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
+const LOGO = '/image.png';
 
 export const metadata = {
   title: 'Általános Szerződési Feltételek — SYORDER',

@@ -35,8 +35,10 @@ export function middleware(request: NextRequest) {
     subdomain !== null && !isAdminSubdomain && !isPos2Subdomain && !isKeresSubdomain;
 
   // ── Auth cookie ──────────────────────────────────────────────
-  const supabaseCookieName = `sb-0ec90b57d6e95fcbda19832f-auth-token`;
-  const hasSession = request.cookies.has(supabaseCookieName);
+  const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/https:\/\/([^.]+)/)?.[1] ?? '';
+  const supabaseCookieName = `sb-${projectRef}-auth-token`;
+  const hasSession = request.cookies.has(supabaseCookieName) ||
+    [...request.cookies.getAll()].some(c => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'));
 
   // ── admin.syorder.hu → /admin/* ──────────────────────────────
   if (isAdminSubdomain) {
