@@ -29,7 +29,6 @@ import {
   PowerOff,
   ExternalLink,
   Calendar,
-  Trash2,
 } from 'lucide-react';
 import { supabase, Tenant } from '@/lib/supabase/client';
 import { toast } from 'sonner';
@@ -39,7 +38,6 @@ export default function AdminPartnersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [toggleTarget, setToggleTarget] = useState<Tenant | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Tenant | null>(null);
   const [saving, setSaving] = useState(false);
 
   const loadPartners = useCallback(async () => {
@@ -84,20 +82,6 @@ export default function AdminPartnersPage() {
           : `${toggleTarget.name} aktiválva`
       );
       setToggleTarget(null);
-      loadPartners();
-    }
-    setSaving(false);
-  }
-
-  async function handleDelete() {
-    if (!deleteTarget) return;
-    setSaving(true);
-    const { error } = await supabase.from('tenants').delete().eq('id', deleteTarget.id);
-    if (error) {
-      toast.error('Hiba történt a törlés során: ' + error.message);
-    } else {
-      toast.success(`${deleteTarget.name} törölve`);
-      setDeleteTarget(null);
       loadPartners();
     }
     setSaving(false);
@@ -255,17 +239,6 @@ export default function AdminPartnersPage() {
                         <><Power className="h-3.5 w-3.5" /> Aktivál</>
                       )}
                     </Button>
-                    {!partner.is_active && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setDeleteTarget(partner)}
-                        className="gap-1 text-red-700 border-red-300 hover:bg-red-50"
-                        title="Partner törlése"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -296,29 +269,6 @@ export default function AdminPartnersPage() {
               className={!toggleTarget?.is_active ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
             >
               {saving ? 'Mentés...' : toggleTarget?.is_active ? 'Deaktiválás' : 'Aktiválás'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete confirm dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-red-700">Partner Végleges Törlése</DialogTitle>
-            <DialogDescription>
-              <span className="block mb-2">
-                Biztosan törlöd a(z) <strong>{deleteTarget?.name}</strong> partnert?
-              </span>
-              <span className="block text-red-600 font-medium">
-                Ez a művelet visszavonhatatlan! Az összes rendelés, menü és adat véglegesen törlődik.
-              </span>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Mégse</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
-              {saving ? 'Törlés...' : 'Végleges Törlés'}
             </Button>
           </DialogFooter>
         </DialogContent>

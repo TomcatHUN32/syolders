@@ -16,9 +16,8 @@ import {
   ArrowUpRight,
   AlertTriangle,
   CheckCircle,
-  CalendarClock,
 } from 'lucide-react';
-import { supabase, Order, MenuItem, Ingredient, Subscription } from '@/lib/supabase/client';
+import { supabase, Order, MenuItem, Ingredient } from '@/lib/supabase/client';
 
 interface DashboardStats {
   todayOrders: number;
@@ -71,7 +70,6 @@ export default function DashboardPage() {
   });
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [lowStockItems, setLowStockItems] = useState<LowStockIngredient[]>([]);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -92,9 +90,6 @@ export default function DashboardPage() {
   async function loadDashboardData() {
     try {
       const today = new Date().toISOString().split('T')[0];
-
-      // Load subscription alongside other data
-      const subRes = supabase.from('subscriptions').select('*').maybeSingle();
 
       const { data: ordersData } = await supabase
         .from('orders')
@@ -147,9 +142,6 @@ export default function DashboardPage() {
 
         setLowStockItems(lowStock as LowStockIngredient[]);
       }
-
-      const { data: subData } = await subRes;
-      setSubscription(subData ?? null);
     } catch (error) {
       console.error('Hiba az irányítópult betöltésekor:', error);
     } finally {
@@ -171,9 +163,6 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold">Irányítópult</h1>
         <p className="text-muted-foreground">Üdvözlünk vissza! Íme, mi történt ma.</p>
       </div>
-
-      {/* Subscription widget */}
-      {subscription && <SubscriptionWidget subscription={subscription} />}
 
       {/* Statisztika kártyák */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -349,67 +338,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
-}
-
-function SubscriptionWidget({ subscription }: { subscription: Subscription }) {
-  const daysLeft = subscription.expires_at
-    ? Math.ceil((new Date(subscription.expires_at).getTime() - Date.now()) / 86_400_000)
-    : null;
-
-  const isExpired = daysLeft !== null && daysLeft <= 0;
-  const isRed = daysLeft !== null && daysLeft > 0 && daysLeft <= 7;
-  const isYellow = daysLeft !== null && daysLeft > 7 && daysLeft <= 30;
-
-  const bg = isExpired || isRed
-    ? 'bg-red-50 border-red-200'
-    : isYellow
-    ? 'bg-amber-50 border-amber-200'
-    : 'bg-emerald-50 border-emerald-200';
-
-  const textMain = isExpired || isRed
-    ? 'text-red-700'
-    : isYellow
-    ? 'text-amber-700'
-    : 'text-emerald-700';
-
-  const textSub = isExpired || isRed
-    ? 'text-red-500'
-    : isYellow
-    ? 'text-amber-500'
-    : 'text-emerald-500';
-
-  const daysLabel = isExpired
-    ? 'Lejárt'
-    : daysLeft === null
-    ? 'Korlátlan'
-    : `${daysLeft} nap van hátra`;
-
-  return (
-    <div className={`rounded-xl border p-4 flex items-center gap-4 ${bg}`}>
-      <div className={`p-2.5 rounded-lg ${isExpired || isRed ? 'bg-red-100' : isYellow ? 'bg-amber-100' : 'bg-emerald-100'}`}>
-        <CalendarClock className={`h-5 w-5 ${textMain}`} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className={`font-semibold ${textMain}`}>{subscription.plan_name} csomag</p>
-        <p className={`text-sm ${textSub}`}>
-          {daysLabel}
-          {subscription.expires_at && !isExpired && (
-            <> · Lejárat: {new Date(subscription.expires_at).toLocaleDateString('hu-HU')}</>
-          )}
-        </p>
-      </div>
-      {isExpired && (
-        <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-1 rounded-md whitespace-nowrap">
-          Megújítás szükséges
-        </span>
-      )}
-      {isRed && !isExpired && (
-        <span className="text-xs font-semibold bg-red-100 text-red-700 px-2 py-1 rounded-md whitespace-nowrap">
-          Hamarosan lejár!
-        </span>
-      )}
     </div>
   );
 }

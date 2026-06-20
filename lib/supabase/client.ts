@@ -555,34 +555,6 @@ export type Database = {
           created_at?: string;
         };
       };
-      subscriptions: {
-        Row: {
-          id: string;
-          tenant_id: string;
-          plan_name: string;
-          status: string;
-          starts_at: string;
-          expires_at: string | null;
-          billing_period: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          tenant_id: string;
-          plan_name?: string;
-          status?: string;
-          starts_at?: string;
-          expires_at?: string | null;
-          billing_period?: string | null;
-        };
-        Update: {
-          plan_name?: string;
-          status?: string;
-          expires_at?: string | null;
-          billing_period?: string | null;
-        };
-      };
     };
   };
 };
@@ -601,7 +573,6 @@ export type InventoryTransaction = Database['public']['Tables']['inventory_trans
 export type DailyStat = Database['public']['Tables']['daily_stats']['Row'];
 export type RestaurantRequest = Database['public']['Tables']['restaurant_requests']['Row'];
 export type PlatformReview = Database['public']['Tables']['platform_reviews']['Row'];
-export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
 
 export type OrderWithItems = Order & { order_items: (OrderItem & { menu_item: MenuItem | null })[] };
 export type MenuItemWithCategory = MenuItem & { category: MenuCategory | null };

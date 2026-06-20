@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,34 +18,9 @@ import {
   XCircle,
   RefreshCw,
   Phone,
-  Bell,
-  BellOff,
 } from 'lucide-react';
 import { supabase, Order, OrderItem, MenuItem } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-
-function playNewOrderSound() {
-  try {
-    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    const now = ctx.currentTime;
-    const notes = [523.25, 659.25, 783.99, 1046.5];
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0, now + i * 0.12);
-      gain.gain.linearRampToValueAtTime(0.35, now + i * 0.12 + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.28);
-      osc.start(now + i * 0.12);
-      osc.stop(now + i * 0.12 + 0.3);
-    });
-  } catch {
-    // Web Audio not available
-  }
-}
 
 type OrderWithItems = Order & {
   order_items: (OrderItem & { menu_item: MenuItem | null })[];
@@ -67,11 +42,8 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('active');
   const [updating, setUpdating] = useState<string | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const knownOrderIds = useRef<Set<string>>(new Set());
-  const initialLoad = useRef(true);
 
-  const loadOrders = useCallback(async (triggerSound = false) => {
+  const loadOrders = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -80,39 +52,22 @@ export default function OrdersPage() {
         .limit(100);
 
       if (error) throw error;
-      const rows = data as OrderWithItems[];
-
-      if (initialLoad.current) {
-        rows.forEach((o) => knownOrderIds.current.add(o.id));
-        initialLoad.current = false;
-      } else if (triggerSound) {
-        const newOrders = rows.filter((o) => !knownOrderIds.current.has(o.id));
-        if (newOrders.length > 0) {
-          newOrders.forEach((o) => knownOrderIds.current.add(o.id));
-          if (soundEnabled) playNewOrderSound();
-          toast.success(`${newOrders.length} új rendelés érkezett!`, { duration: 5000 });
-        }
-      }
-
-      setOrders(rows);
+      setOrders(data as OrderWithItems[]);
     } catch (error) {
       console.error('Hiba a rendelések betöltésekor:', error);
       toast.error('Nem sikerült betölteni a rendeléseket');
     } finally {
       setLoading(false);
     }
-  }, [soundEnabled]);
+  }, []);
 
   useEffect(() => {
-    loadOrders(false);
+    loadOrders();
 
     const channel = supabase
       .channel('orders-realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => {
-        loadOrders(true);
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => {
-        loadOrders(false);
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        loadOrders();
       })
       .subscribe();
 
@@ -190,22 +145,10 @@ export default function OrdersPage() {
           <h1 className="text-3xl font-bold">Rendelések</h1>
           <p className="text-muted-foreground">Kezeld és kövesd nyomon az összes rendelést valós időben</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSoundEnabled((v) => !v)}
-            className={soundEnabled ? 'text-emerald-600 border-emerald-300 hover:bg-emerald-50' : 'text-slate-400'}
-            title={soundEnabled ? 'Hang értesítés bekapcsolva' : 'Hang értesítés kikapcsolva'}
-          >
-            {soundEnabled ? <Bell className="h-4 w-4 mr-1.5" /> : <BellOff className="h-4 w-4 mr-1.5" />}
-            {soundEnabled ? 'Hang: Be' : 'Hang: Ki'}
-          </Button>
-          <Button variant="outline" onClick={() => loadOrders(false)}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Frissítés
-          </Button>
-        </div>
+        <Button variant="outline" onClick={loadOrders}>
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Frissítés
+        </Button>
       </div>
 
       {/* Státusz áttekintés */}
