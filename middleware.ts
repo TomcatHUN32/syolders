@@ -4,13 +4,13 @@ import { NextResponse, NextRequest } from 'next/server';
  * SYORDER Subdomain Routing Middleware
  *
  * Production subdomains:
- *   syorder.hu / www.syorder.hu  → app/page.tsx  (marketing landing page)
- *   admin.syorder.hu             → /admin/*       (superadmin panel)
- *   pos2.syorder.hu              → /login → /dashboard (staff login)
- *   <slug>.syorder.hu            → /restaurant/<slug> (restaurant public page)
+ *   syorder.hu / www.syorder.hu  → app/page.tsx        (marketing landing page)
+ *   admin.syorder.hu             → /admin/*             (superadmin panel)
+ *   keres.syorder.hu             → /search              (restaurant finder)
+ *   pos2.syorder.hu              → /login → /dashboard  (staff login/POS)
+ *   <slug>.syorder.hu            → /restaurant/<slug>   (restaurant public page)
  *
- * Development (localhost): path-based routing works normally.
- * Use ?subdomain=<value> to simulate any subdomain locally.
+ * Development: use ?subdomain=<value> to simulate any subdomain locally.
  */
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -30,8 +30,9 @@ export function middleware(request: NextRequest) {
 
   const isAdminSubdomain = subdomain === 'admin';
   const isPos2Subdomain = subdomain === 'pos2';
+  const isKeresSubdomain = subdomain === 'keres';
   const isRestaurantSubdomain =
-    subdomain !== null && !isAdminSubdomain && !isPos2Subdomain;
+    subdomain !== null && !isAdminSubdomain && !isPos2Subdomain && !isKeresSubdomain;
 
   // ── Auth cookie ──────────────────────────────────────────────
   const supabaseCookieName = `sb-0ec90b57d6e95fcbda19832f-auth-token`;
@@ -39,13 +40,18 @@ export function middleware(request: NextRequest) {
 
   // ── admin.syorder.hu → /admin/* ──────────────────────────────
   if (isAdminSubdomain) {
-    // Let /login and /admin/* through; everything else → /admin or /login
     if (pathname === '/login') return NextResponse.next();
     if (pathname.startsWith('/admin')) return NextResponse.next();
-    if (!hasSession) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+    if (!hasSession) return NextResponse.redirect(new URL('/login', request.url));
     return NextResponse.redirect(new URL('/admin', request.url));
+  }
+
+  // ── keres.syorder.hu → /search ───────────────────────────────
+  if (isKeresSubdomain) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/search';
+    url.searchParams.delete('subdomain');
+    return NextResponse.rewrite(url);
   }
 
   // ── pos2.syorder.hu → staff login / dashboard ────────────────
@@ -61,17 +67,14 @@ export function middleware(request: NextRequest) {
 
   // ── <slug>.syorder.hu → /restaurant/<slug> (rewrite) ─────────
   if (isRestaurantSubdomain) {
-    // Staff dashboard & login pass through
     if (pathname.startsWith('/dashboard')) {
       if (!hasSession) return NextResponse.redirect(new URL('/login', request.url));
       return NextResponse.next();
     }
     if (pathname === '/login') return NextResponse.next();
 
-    // Rewrite every other path to the restaurant public page
     const url = request.nextUrl.clone();
     url.pathname = `/restaurant/${subdomain}`;
-    // Preserve query params (but strip the subdomain override itself)
     url.searchParams.delete('subdomain');
     const response = NextResponse.rewrite(url);
     response.headers.set('X-Restaurant-Slug', subdomain!);
@@ -83,6 +86,7 @@ export function middleware(request: NextRequest) {
     pathname === '/' ||
     pathname === '/login' ||
     pathname === '/register' ||
+    pathname === '/search' ||
     pathname.startsWith('/menu/') ||
     pathname.startsWith('/restaurant/') ||
     pathname.startsWith('/admin');

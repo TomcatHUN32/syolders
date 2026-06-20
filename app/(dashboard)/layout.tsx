@@ -9,7 +9,6 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-  Utensils,
   LayoutDashboard,
   ShoppingBag,
   Package,
@@ -54,9 +53,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const Sidebar = () => (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <Utensils className="h-7 w-7 text-primary" />
-          <span className="text-xl font-bold">Falathaz</span>
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <div className="h-9 w-9 flex items-center justify-center rounded-xl overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
+            <img src="/image.png" alt="SYORDER" className="h-8 w-8 object-contain" />
+          </div>
+          <span className="text-sm font-bold tracking-widest uppercase">SYORDER</span>
         </Link>
       </div>
       <ScrollArea className="flex-1 px-3 py-4">

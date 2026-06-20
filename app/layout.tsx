@@ -6,10 +6,10 @@ import { Toaster } from '@/components/ui/sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Falathaz - Étterem Menedzsment Platform',
+  title: 'SYORDER - Étterem Menedzsment Platform',
   description: 'Multi-tenant SaaS platform étteremek számára. Kezeld a rendeléseket, készletet, hűségprogramot és analitikát.',
   openGraph: {
-    title: 'Falathaz - Étterem Menedzsment Platform',
+    title: 'SYORDER - Étterem Menedzsment Platform',
     description: 'Teljes körű étterem-menedzsment megoldás',
     type: 'website',
   },
