@@ -21,7 +21,6 @@ import {
   Shield,
   Loader2,
   AlertCircle,
-  LogIn,
   Menu,
   X,
 } from 'lucide-react';
@@ -136,11 +135,6 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Link href="/login" className="hidden md:inline-flex">
-                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white gap-1.5 hover:bg-slate-800">
-                  <LogIn className="h-3.5 w-3.5" /> Belépés
-                </Button>
-              </Link>
               <a href="#igenyles" className="hidden md:inline-flex">
                 <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-100 font-semibold">
                   Igénylés
@@ -157,9 +151,10 @@ export default function LandingPage() {
               {[['#features','Funkciók'],['#pricing','Árak'],['#igenyles','Igénylés']].map(([h,l])=>(
                 <a key={h} href={h} onClick={() => setNavOpen(false)} className="block px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 text-sm">{l}</a>
               ))}
-              <div className="pt-2 border-t border-slate-800 flex gap-2">
-                <Link href="/login" className="flex-1"><Button variant="outline" size="sm" className="w-full border-slate-700 text-slate-300 bg-transparent">Belépés</Button></Link>
-                <a href="#igenyles" className="flex-1"><Button size="sm" className="w-full bg-white text-slate-900">Igénylés</Button></a>
+              <div className="pt-2 border-t border-slate-800">
+                <a href="#igenyles" onClick={() => setNavOpen(false)}>
+                  <Button size="sm" className="w-full bg-white text-slate-900">Igénylés</Button>
+                </a>
               </div>
             </div>
           )}
@@ -462,11 +457,6 @@ export default function LandingPage() {
             <span className="font-bold text-white tracking-widest text-sm uppercase">SYORDER</span>
           </div>
           <p className="text-xs text-slate-600">© {new Date().getFullYear()} SYORDER. Minden jog fenntartva.</p>
-          <div className="flex items-center gap-4 text-xs">
-            <Link href="/login" className="text-slate-500 hover:text-white transition-colors flex items-center gap-1">
-              <LogIn className="h-3.5 w-3.5" /> Partner Belépés
-            </Link>
-          </div>
         </div>
       </footer>
     </div>
