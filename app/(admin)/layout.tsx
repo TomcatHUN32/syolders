@@ -54,7 +54,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               width={28}
               height={28}
               className="object-contain w-full h-full"
-              style={{ mixBlendMode: 'screen' }}
             />
           </div>
           <div>
