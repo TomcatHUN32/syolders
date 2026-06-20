@@ -1,3 +1,0 @@
-ALTER TABLE restaurant_requests
-  ADD COLUMN IF NOT EXISTS pos_email TEXT,
-  ADD COLUMN IF NOT EXISTS pos_tenant_id UUID REFERENCES tenants(id) ON DELETE SET NULL;

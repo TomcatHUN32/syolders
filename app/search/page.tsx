@@ -15,9 +15,8 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
-import { SyorderLogoMark } from '@/components/syorder-logo';
 
-// Logo constant removed — using SVG component
+const LOGO = '/Gemini_Generated_Image_gaqzzsgaqzzsgaqz-removebg-preview.png';
 
 interface Restaurant {
   id: string;
@@ -100,7 +99,7 @@ export default function SearchPage() {
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2.5 select-none shrink-0">
             <div className="h-8 w-8 flex items-center justify-center rounded-lg overflow-hidden bg-slate-800 border border-slate-700">
-              <SyorderLogoMark size={24} variant="light" />
+              <img src={LOGO} alt="SYORDER" className="h-7 w-7 object-contain" />
             </div>
             <div className="hidden sm:block">
               <span className="font-bold text-white tracking-widest text-xs uppercase leading-none block">SYORDER</span>
@@ -252,7 +251,7 @@ export default function SearchPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="h-8 w-8 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden">
-              <SyorderLogoMark size={24} variant="light" />
+              <img src={LOGO} alt="SYORDER" className="h-7 w-7 object-contain" />
             </div>
             <span className="font-bold text-slate-900 tracking-widest text-sm uppercase">SYORDER</span>
           </Link>
