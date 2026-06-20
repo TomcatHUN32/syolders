@@ -24,6 +24,8 @@ export type Database = {
           subscription_plan: string;
           subscription_ends_at: string | null;
           settings: Record<string, unknown>;
+          delivery_cities: string[];
+          cuisines: string[];
           created_at: string;
           updated_at: string;
         };
@@ -42,6 +44,8 @@ export type Database = {
           subscription_plan?: string;
           subscription_ends_at?: string | null;
           settings?: Record<string, unknown>;
+          delivery_cities?: string[];
+          cuisines?: string[];
           created_at?: string;
           updated_at?: string;
         };
@@ -60,6 +64,8 @@ export type Database = {
           subscription_plan?: string;
           subscription_ends_at?: string | null;
           settings?: Record<string, unknown>;
+          delivery_cities?: string[];
+          cuisines?: string[];
           created_at?: string;
           updated_at?: string;
         };
@@ -517,6 +523,32 @@ export type Database = {
           updated_at?: string;
         };
       };
+      platform_reviews: {
+        Row: {
+          id: string;
+          tenant_id: string | null;
+          rating: number;
+          comment: string | null;
+          reviewer_name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          tenant_id?: string | null;
+          rating: number;
+          comment?: string | null;
+          reviewer_name?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          tenant_id?: string | null;
+          rating?: number;
+          comment?: string | null;
+          reviewer_name?: string;
+          created_at?: string;
+        };
+      };
     };
   };
 };
@@ -534,6 +566,7 @@ export type LoyaltyTransaction = Database['public']['Tables']['loyalty_transacti
 export type InventoryTransaction = Database['public']['Tables']['inventory_transactions']['Row'];
 export type DailyStat = Database['public']['Tables']['daily_stats']['Row'];
 export type RestaurantRequest = Database['public']['Tables']['restaurant_requests']['Row'];
+export type PlatformReview = Database['public']['Tables']['platform_reviews']['Row'];
 
 export type OrderWithItems = Order & { order_items: (OrderItem & { menu_item: MenuItem | null })[] };
 export type MenuItemWithCategory = MenuItem & { category: MenuCategory | null };
